@@ -1,0 +1,497 @@
+openapi: 3.0.3
+info:
+  title: Mcleod Logistics APIs
+  version: "1.0"
+  description: API documentation McLeod POC
+
+servers:
+  - url: http://127.0.0.1:5000
+    description: Local development server
+
+paths:
+
+  /truck-types:
+    get:
+      summary: Fetch all truck types
+      responses:
+        "200":
+          description: List of truck types
+          content:
+            application/json:
+              example:
+                - container
+                - dry_van
+                - flatbed
+                - reefer
+  
+  /carriers:
+    get:
+      summary: Fetch all carrier names
+      responses:
+        "200":
+          description: List of carriers
+          content:
+            application/json:
+              example:
+                - Carrier M
+                - Carrier B
+                - Carrier C
+                - Carrier H
+                - Carrier K
+                - Carrier A
+                - Carrier D
+                - Carrier I
+                - Carrier J
+                - Carrier N
+                - Carrier F
+                - Carrier G
+                - Carrier L
+                - Carrier O
+                - Carrier E
+
+  /origins:
+    get:
+      summary: Fetch all origins
+      responses:
+        "200":
+          description: List of origin cities
+          content:
+            application/json:
+              example:
+                - Auburn
+                - Austin
+                - Birmingham
+                - Charlotte
+                - Chattanooga
+                - Chicago
+                - Clarksville
+                - Columbus
+                - Dallas
+                - Decatur
+                - Denver
+                - Dothan
+                - Florence
+                - Fort Worth
+                - Franklin
+                - Hoover
+                - Houston
+                - Huntsville
+                - Indianapolis
+                - Jackson
+                - Jacksonville
+                - Johnson City
+                - Kingsport
+                - Knoxville
+                - Los Angeles
+                - Memphis
+                - Mobile
+                - Montgomery
+                - Murfreesboro
+                - Nashville
+                - New York
+                - Philadelphia
+                - Phoenix
+                - San Antonio
+                - San Diego
+                - San Francisco
+                - San Jose
+                - Seattle
+                - Tuscaloosa
+                - Washington
+
+  /destinations:
+    get:
+      summary: Fetch all destinations
+      responses:
+        "200":
+          description: List of destination cities
+          content:
+            application/json:
+              example:
+                - Auburn
+                - Austin
+                - Birmingham
+                - Charlotte
+                - Chattanooga
+                - Chicago
+                - Clarksville
+                - Columbus
+                - Dallas
+                - Decatur
+                - Denver
+                - Dothan
+                - Florence
+                - Fort Worth
+                - Franklin
+                - Hoover
+                - Houston
+                - Huntsville
+                - Indianapolis
+                - Jackson
+                - Jacksonville
+                - Johnson City
+                - Kingsport
+                - Knoxville
+                - Los Angeles
+                - Memphis
+                - Mobile
+                - Montgomery
+                - Murfreesboro
+                - Nashville
+                - New York
+                - Philadelphia
+                - Phoenix
+                - San Antonio
+                - San Diego
+                - San Francisco
+                - San Jose
+                - Seattle
+                - Tuscaloosa
+                - Washington
+
+  /lane-ids:
+    get:
+      summary: Fetch all lane IDs
+      responses:
+        "200":
+          description: List of lane IDs
+          content:
+            application/json:
+              example:
+                - lane_013
+                - lane_036
+                - lane_037
+                - lane_052
+                - lane_055
+                - lane_065
+                - lane_066
+                - lane_076
+                - lane_083
+                - lane_089
+                - lane_102
+                - lane_121
+                - lane_142
+                - lane_154
+                # ... (truncated for brevity)
+
+  /lane-details:
+    post:
+      summary: Fetch lane details by origin and destination
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                origin:
+                  type: string
+                  example: Chicago
+                destination:
+                  type: string
+                  example: San Jose
+      responses:
+        "200":
+          description: Lane details
+          content:
+            application/json:
+              example:
+                lane_id: lane_125
+                origin: Chicago
+                destination: San Jose
+                distance_miles: 1842.1
+        "404":
+          description: Lane not found
+        "400":
+          description: Missing parameters
+
+  /carrier-id:
+    post:
+      summary: Fetch carrier ID by carrier name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                carrier_name:
+                  type: string
+                  example: Carrier A
+      responses:
+        "200":
+          description: Carrier ID and SCAC code
+          content:
+            application/json:
+              example:
+                carrier_id: carrier_001
+                scac_code: LGCA
+        "404":
+          description: Carrier not found
+
+  /available-trucks:
+    post:
+      summary: Fetch available trucks of a given type for a carrier and date
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                carrier_id:
+                  type: string
+                  example: carrier_013
+                truck_type:
+                  type: string
+                  example: container
+                schedule_date:
+                  type: string
+                  format: date
+                  example: 2025-08-08
+      responses:
+        "200":
+          description: List of available truck IDs
+          content:
+            application/json:
+              example:
+                available_trucks:
+                  - truck_013_006
+                  - truck_013_001
+
+  /book-shipment:
+    post:
+      summary: Book a shipment if trucks available; suggest alternatives otherwise
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  example: USER123
+                carrier_name:
+                  type: string
+                  example: Carrier B
+                truck_type:
+                  type: string
+                  example: container
+                lane_id:
+                  type: string
+                  example: lane_037
+                origin:
+                  type: string
+                  example: Nashville
+                destination:
+                  type: string
+                  example: Hoover
+                schedule_date:
+                  type: string
+                  format: date
+                  example: 2025-08-09
+                weight:
+                  type: number
+                  example: 20
+                volume:
+                  type: number
+                  example: 40
+      responses:
+        "200":
+          description: Successful booking
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  msg:
+                    type: string
+                    example: Shipment booked successfully!
+                  allocated_truck_id:
+                    type: string
+                    example: truck_002_005
+  
+        "400":
+          description: No trucks available or alternative carriers available
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  msg:
+                    type: string
+                    example: >
+                      The requested carrier does not have available trucks of the requested type for the chosen date.
+                  alternative_carriers:
+                    type: array
+                    description: List of carriers that have available trucks of the requested type
+                    items:
+                      type: object
+                      properties:
+                        carrier_name:
+                          type: string
+                          example: Carrier M
+                        available_trucks_count:
+                          type: integer
+                          example: 2
+                # `alternative_carriers` field may be omitted or empty if no alternatives found
+
+
+  /lane-prediction:
+    post:
+      summary: Fetch lane status prediction for a given lane, carrier, and date
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lane_id:
+                  type: string
+                  example: lane_037
+                carrier_id:
+                  type: string
+                  example: carrier_002
+                date:
+                  type: string
+                  format: date
+                  example: 2025-08-09
+      responses:
+        "200":
+          description: Lane prediction result
+          content:
+            application/json:
+              example:
+                available: 25
+                booked: 44
+                status: Overbooked
+
+  /aggregated-lane-prediction:
+    post:
+      summary: Get lane status aggregated prediction for all carriers (by lane and date)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lane_id:
+                  type: string
+                  example: lane_037
+                date:
+                  type: string
+                  format: date
+                  example: 2025-08-09
+      responses:
+        "200":
+          description: Aggregated lane prediction for all carriers
+          content:
+            application/json:
+              example:
+                Overall_Status: Overbooked
+                total_available: 556
+                total_booked: 598
+                predictions:
+                  - carrier: Carrier M
+                    available: 31
+                    booked: 46
+                    status: Overbooked
+                  - carrier: Carrier B
+                    available: 25
+                    booked: 44
+                    status: Overbooked
+                  # ... truncated for brevity ...
+
+  /insights:
+    get:
+      summary: Get summary analytics for carriers, trucks, lanes, and bookings
+      responses:
+        "200":
+          description: Summary counts
+          content:
+            application/json:
+              example:
+                carrier_count: 15
+                truck_count: 105
+                lane_count: 200
+                booking_count: 1
+
+  /destination-by-origin:
+    post:
+      summary: Fetch destinations for a selected origin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                origin:
+                  type: string
+                  example: Chicago
+      responses:
+        "200":
+          description: List of destinations
+          content:
+            application/json:
+              example:
+                - Austin
+                - Birmingham
+                - Huntsville
+                - Johnson City
+                - San Diego
+                - San Jose
+
+  /truck-types-count:
+    get:
+      summary: Get count of trucks grouped by truck type
+      responses:
+        "200":
+          description: Truck counts by type
+          content:
+            application/json:
+              example:
+                - truck_type: reefer
+                  count: 28
+                - truck_type: container
+                  count: 29
+                - truck_type: dry_van
+                  count: 20
+                - truck_type: flatbed
+                  count: 28
+
+  /lane-map:
+    post:
+      summary: Return Mapbox Directions API URL for lane route (exposed)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lane_id:
+                  type: string
+                  example: lane_037
+      responses:
+        "200":
+          description: Mapbox API URL for route
+          content:
+            application/json:
+              example:
+                mapbox_url: >
+                  https://api.mapbox.com/directions/v5/mapbox/driving/-86.7816,36.1627;-86.8092,33.3857?geometries=geojson&access_token=pk.eyJ1Ijoic2lkZGhhbnRtaiIsImEiOiJjbTZodnpqN3UwMXMzMmpxczEzczN2ZGdjIn0.b18NHjZiSvBmy5RyeJQgog
+        "400":
+          description: Coordinates not available
+        "404":
+          description: Lane not found
+

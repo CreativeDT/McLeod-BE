@@ -381,32 +381,57 @@ def api_book_shipment():
 
 # ========== LANE STATUS SECTION APIS ==========
 
-@app.route('/lane-prediction', methods=['POST'])
+@app.route("/lane-prediction", methods=["POST"])
 def lane_prediction():
     try:
         d = request.json
+        lane_id = d.get("lane_id")
+        carrier_name = d.get("carrier_name")
+        date = d.get("date")
+
+        carrier = db.carrier_partners.find_one({"name": carrier_name})
+        
+        # Get prediction
         pred = db.predicted_lane_statuses_dl.find_one({
-            "lane_id": d.get("lane_id"),
-            "carrier_id": d.get("carrier_id"),
-            "date": d.get("date")
+            "lane_id": lane_id,
+            "carrier_id": carrier['carrier_id'],
+            "date": date
         })
-        if pred:
-            result = {
-                "available": pred.get("predicted_available_truck_count_assumption", 0),
-                "booked": pred.get("predicted_booking_count_assumption", 0)
+
+        # Get lane details
+        lane = db.lanes.find_one({"lane_id": lane_id}, {"_id": 0, "origin": 1, "destination": 1, "distance": 1})
+
+        if pred and lane:
+            distance_km = lane.get("distance", 0)
+            # If you have a km_to_miles utility, use it. Otherwise:
+            distance_miles = round(distance_km * 0.621371, 2) if distance_km else None
+            status = (
+                "Balanced" if pred.get("predicted_available_truck_count_assumption", 0) == pred.get("predicted_booking_count_assumption", 0)
+                else "Underbooked" if pred.get("predicted_available_truck_count_assumption", 0) > pred.get("predicted_booking_count_assumption", 0)
+                else "Overbooked"
+            )
+            available_trucks = pred.get("predicted_available_truck_count_assumption", 0)
+            Booked_trucks = pred.get("predicted_booking_count_assumption", 0)
+            response = {
+                "origin": lane["origin"],
+                "destination": lane["destination"],
+                "distance_miles": distance_miles,
+                "total_trucks": available_trucks + Booked_trucks,
+                "available": available_trucks,
+                "booked": Booked_trucks,
+                "status": status,
+                "lane_id":lane_id,
+                "carrier_name": carrier_name,
+                "date":date
             }
-            if result["available"] == result["booked"]:
-                result['status'] = 'Balanced'
-            elif result["available"] > result["booked"]:
-                result['status'] = 'Underbooked'
-            else:
-                result['status'] = 'Overbooked'
-            return jsonify(result)
+            return jsonify(response)
         else:
-            return jsonify({"error": "No prediction found"}), 404
+            return jsonify({"error": "Prediction or lane not found"}), 404
+
     except Exception as e:
         logging.error(f"/lane-prediction error: {str(e)}")
         return jsonify({"error": "Server error", "details": str(e)}), 500
+
 
 @app.route('/aggregated-lane-prediction', methods=['POST'])
 def future_lane_prediction():
@@ -415,29 +440,47 @@ def future_lane_prediction():
         date = request.json.get("date")
         all_preds = []
         total_available, total_booked = 0, 0
+
+        # Fetch lane details once
+        lane = db.lanes.find_one({"lane_id": lane_id}, {"_id": 0, "origin": 1, "destination": 1})
+        if not lane:
+            return jsonify({"error": "Lane not found"}), 404
+
         for c in db.carrier_partners.find({}):
             pred = db.predicted_lane_statuses_dl.find_one({
                 "lane_id": lane_id, "carrier_id": c["carrier_id"], "date": date
             })
             available = pred.get("predicted_available_truck_count_assumption", 0) if pred else 0
             booked = pred.get("predicted_booking_count_assumption", 0) if pred else 0
+            status = "Underbooked" if available > booked else ("Balanced" if available == booked else "Overbooked")
             all_preds.append({
                 "carrier": c["name"],
                 "available": available,
                 "booked": booked,
-                "status": "Underbooked" if available > booked else ("Balanced" if available == booked else "Overbooked")
+                "status": status
             })
             total_available += available
             total_booked += booked
-            Overall_status = (
-                                'Balanced' if total_available == total_booked 
-                                else 'Underbooked' if total_available > total_booked 
-                                else 'Overbooked'
-                            )
-        return jsonify({"predictions": all_preds, "total_available": total_available, "total_booked": total_booked, "Overall Status": Overall_status})
+
+        Overall_status = (
+            'Balanced' if total_available == total_booked 
+            else 'Underbooked' if total_available > total_booked 
+            else 'Overbooked'
+        )
+
+        return jsonify({
+            "origin": lane["origin"],
+            "destination": lane["destination"],
+            "predictions": all_preds,
+            "total_available": total_available,
+            "total_booked": total_booked,
+            "Overall Status": Overall_status
+        })
+
     except Exception as e:
         logging.error(f"/future-lane-prediction error: {str(e)}")
         return jsonify({"error": "Server error", "details": str(e)}), 500
+
 
 # ========== INSIGHTS SECTION APIS ==========
 

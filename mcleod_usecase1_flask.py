@@ -6,11 +6,15 @@ from datetime import datetime
 import requests
 import json
 import configparser
+from flask_cors import CORS
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 
+
+
 app = Flask(__name__)
+CORS(app)
 
 # ========== MONGO SETUP ==========
 MONGO_URI = config.get('mongodb', 'uri')
@@ -212,7 +216,11 @@ def carrier_id():
     try:
         carrier_name = request.json.get("carrier_name")
         carrier = db.carrier_partners.find_one({"name": carrier_name})
-        return jsonify({"carrier_id": carrier["carrier_id"], "scac code": carrier['scac_code']}) if carrier else jsonify({"error": "Not found"}), 404
+        print(carrier)
+        if carrier:
+            return jsonify({"carrier_id": carrier["carrier_id"], "scac code": carrier['scac_code']}) 
+        else:
+            jsonify({"error": "Not found"}), 404
     except Exception as e:
         logging.error(f"/carrier-id error: {str(e)}")
         return jsonify({"error": "Server error", "details": str(e)}), 500

@@ -1,0 +1,93 @@
+{
+  "/lane-details": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "origin": { "type": "string" },
+      "destination": { "type": "string" }
+    },
+    "required": ["origin", "destination"]
+  },
+  "/carrier-id": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "carrier_name": { "type": "string" }
+    },
+    "required": ["carrier_name"]
+  },
+  "/available-trucks": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "carrier_id": { "type": "string" },
+      "truck_type": { "type": "string" },
+      "schedule_date": { "type": "string", "format": "date" }
+    },
+    "required": ["carrier_id", "truck_type", "schedule_date"]
+  },
+  "/book-shipment": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "user_id": { "type": "string" },
+      "carrier_name": { "type": "string" },
+      "truck_id": { "type": "string" },
+      "lane_id": { "type": "string" },
+      "origin": { "type": "string" },
+      "destination": { "type": "string" },
+      "schedule_date": { "type": "string", "format": "date" },
+      "weight": { "type": "number" },
+      "volume": { "type": "number" },
+      "truck_type": { "type": "string" }
+    },
+    "required": [
+      "user_id", "carrier_name", "truck_id", "lane_id",
+      "origin", "destination", "schedule_date",
+      "weight", "volume", "truck_type"
+    ]
+  },
+  "/aggregated-lane-prediction": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "lane_id": { "type": "string" },
+      "date": { "type": "string", "format": "date" }
+    },
+    "required": ["lane_id", "date"]
+  },
+  "/destination-by-origin": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "origin": { "type": "string" }
+    },
+    "required": ["origin"]
+  },
+  "/lane_map_one_origin_multi_dest": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "origin": { "type": "string" }
+    },
+    "required": ["origin"]
+  },
+  "/lane-map": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "lane_id": { "type": "string" }
+    },
+    "required": ["lane_id"]
+  },
+  "/lane-prediction": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "lane_id": { "type": "string" },
+      "carrier_name": { "type": "string" },
+      "date": { "type": "string", "format": "date" }
+    },
+    "required": ["lane_id", "carrier_name", "date"]
+  }
+}

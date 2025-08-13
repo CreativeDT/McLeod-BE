@@ -531,7 +531,7 @@ def future_lane_prediction():
             "total_trucks": total_trucks,
             "total_available": total_available,
             "total_booked": total_booked,
-            "Overall Status": Overall_status
+            "overall_status": Overall_status
         })
 
     except Exception as e:

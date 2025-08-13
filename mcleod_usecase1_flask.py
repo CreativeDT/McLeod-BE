@@ -283,6 +283,7 @@ def api_book_shipment():
         weight = data.get("weight")
         volume = data.get("volume")
         truck_type = data.get("truck_type")
+        scac_code = data.get("scac_code")
 
         # Validate required inputs
         if not all([user_id, carrier_name, lane_id, origin, destination, schedule_date, weight, volume, truck_type]):
@@ -326,7 +327,8 @@ def api_book_shipment():
                 "truck_type": truck_type,
                 "booking_status": "Confirmed",
                 "suggested_date": None,
-                "created_at": datetime.now()
+                "created_at": datetime.now(),
+                "scac_code": scac_code
             }
             db.booking.insert_one(booking_data)
             return jsonify({

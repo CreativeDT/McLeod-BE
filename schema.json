@@ -32,19 +32,19 @@
     "properties": {
       "user_id": { "type": "string" },
       "carrier_name": { "type": "string" },
-      "truck_id": { "type": "string" },
       "lane_id": { "type": "string" },
       "origin": { "type": "string" },
       "destination": { "type": "string" },
       "schedule_date": { "type": "string", "format": "date" },
       "weight": { "type": "number" },
       "volume": { "type": "number" },
-      "truck_type": { "type": "string" }
+      "truck_type": { "type": "string" },
+      "scac_code": { "type": "string" }
     },
     "required": [
       "user_id", "carrier_name", "truck_id", "lane_id",
       "origin", "destination", "schedule_date",
-      "weight", "volume", "truck_type"
+      "weight", "volume", "truck_type", "scac_code"
     ]
   },
   "/aggregated-lane-prediction": {
